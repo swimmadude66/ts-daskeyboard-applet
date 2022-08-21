@@ -44,7 +44,6 @@ export function mergeDeep(target: unknown, ...sources: unknown[]) {
  */
  export function readConfig(logger: Logger) {
   logger.debug(`I have ${process.argv.length} arguments: ` + JSON.stringify(process.argv));
-  let qconfig = {}
   try {
     let config
     if (process.argv.length > 2) {
@@ -66,7 +65,7 @@ export function mergeDeep(target: unknown, ...sources: unknown[]) {
     } else {
       config = minimalConfig()
     }
-    return minimalConfig(mergeDeep(qconfig, config))
+    return config
   } catch (error) {
     logger.error("Could not parse config as JSON")
     return minimalConfig({})
@@ -78,8 +77,12 @@ export function mergeDeep(target: unknown, ...sources: unknown[]) {
  * @param {*} config 
  */
 export function minimalConfig(config: Record<string, unknown> = {}) {
-  config.applet = config.applet || {}
-  config.defaults = config.defaults || {}
+  if (!config.applet) {
+    config.applet = config.applet || {}
+  }
+  if (!config.defaults) {
+    config.defaults = config.defaults || {}
+  }
 
   return config
 }

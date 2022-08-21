@@ -46,8 +46,6 @@ class QDesktopApp {
   private _pollInterval
 
   constructor() {
-    logger.info('CONSTRUCTING APPLET')
-
     process.on('SIGINT', async (message) => {
       logger.info("Got SIGINT, handling shutdown...")
       await this.shutdown()
