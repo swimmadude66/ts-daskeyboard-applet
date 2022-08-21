@@ -1,0 +1,47 @@
+{
+  "name": "ts-daskeyboard-applet",
+  "version": "2.11.5",
+  "description": "A TS refactor of the library for handling signals and events in Das Keyboard Q Cloud",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "mocha -r ts-node/register test/**/*.ts --exit",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swimmadude66/ts-daskeyboard-applet.git"
+  },
+  "keywords": [
+    "Das",
+    "Keyboard",
+    "Q",
+    "Applet"
+  ],
+  "author": "swimmadude66 + Cory Kim",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/swimmadude66/ts-daskeyboard-applet/issues"
+  },
+  "homepage": "https://github.com/swimmadude66/ts-daskeyboard-applet#readme",
+  "dependencies": {
+    "moment": "2.29.4",
+    "node-localstorage": "2.2.1",
+    "request": "2.88.2",
+    "request-promise": "4.2.6",
+    "winston": "3.8.1"
+  },
+  "devDependencies": {
+    "@types/mocha": "9.1.1",
+    "@types/moment": "2.13.0",
+    "@types/node": "18.7.8",
+    "@types/node-localstorage": "1.3.0",
+    "@types/request": "2.48.8",
+    "@types/request-promise": "4.1.48",
+    "mocha": "10.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "4.7.4"
+  },
+  "directories": {
+    "test": "test"
+  }
+}

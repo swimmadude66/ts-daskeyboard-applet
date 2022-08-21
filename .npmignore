@@ -1,0 +1,10 @@
+test/
+tsconfig.json/
+src/
+node_modules/
+local-storage/
+.vscode/
+.env
+.eslintrc
+.eslintrc.yml
+.gitignore
