@@ -77,12 +77,25 @@ export function mergeDeep(target: unknown, ...sources: unknown[]) {
  * @param {*} config 
  */
 export function minimalConfig(config: Record<string, unknown> = {}) {
-  if (!config.applet) {
-    config.applet = config.applet || {}
+  let cfg = unFreeze(config)
+  try {
+    if (!cfg.applet) {
+      cfg.applet = cfg.applet || {}
+    }
+    if (!cfg.defaults) {
+      cfg.defaults = cfg.defaults || {}
+    }
+    return cfg
+  } catch (e) {
+    return cfg
   }
-  if (!config.defaults) {
-    config.defaults = config.defaults || {}
-  }
+}
 
-  return config
+export function unFreeze<T = any>(obj: T): T {
+  if (Object.isFrozen(obj)) {
+    const unfroze = Object.entries(obj).map(([key, value]) => ([key, unFreeze(obj)]))
+    return Object.fromEntries(unfroze)
+  } else {
+    return obj
+  }
 }
