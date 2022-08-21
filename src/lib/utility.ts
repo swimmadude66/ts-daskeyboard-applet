@@ -1,4 +1,4 @@
-import { Logger } from './logger'
+import type { Logger } from './logger'
 
 /**
  * Simple object check.
@@ -43,11 +43,12 @@ export function mergeDeep(target: unknown, ...sources: unknown[]) {
  * argument should be a JSON string.
  */
  export function readConfig(logger: Logger) {
-  logger.debug(`I have ${process.argv.length} arguments: ` + JSON.stringify(process.argv))
-  if (process.argv.length > 2) {
-    try {
+  logger.debug(`I have ${process.argv.length} arguments: ` + JSON.stringify(process.argv));
+  let qconfig = {}
+  try {
+    let config
+    if (process.argv.length > 2) {
       const arg3 = process.argv[2]
-      let config
       if (arg3.toUpperCase() === 'DEV') {
         logger.info("Configuring in dev mode...")
         if (process.argv.length > 3 && process.argv[3].startsWith('{')) {
@@ -57,18 +58,18 @@ export function mergeDeep(target: unknown, ...sources: unknown[]) {
           logger.info("Generating minimal dev config.")
           config = minimalConfig()
         }
-        logger.info("Generated dev configuration: " + config)
+        logger.info("Generated dev configuration: " + JSON.stringify(config, null, 2))
         config.devMode = true
       } else {
         config = JSON.parse(arg3)
       }
-      return config
-    } catch (error) {
-      logger.error("Could not parse config as JSON: " + process.argv[2])
-      return minimalConfig({})
+    } else {
+      config = minimalConfig()
     }
-  } else {
-    return minimalConfig()
+    return minimalConfig(mergeDeep(qconfig, config))
+  } catch (error) {
+    logger.error("Could not parse config as JSON")
+    return minimalConfig({})
   }
 }
 

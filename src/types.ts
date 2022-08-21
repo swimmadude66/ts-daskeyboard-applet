@@ -32,6 +32,11 @@ export interface IQPoint {
 export interface BaseSignalOpts {
   points: IQPoint[][]
   action?: Actions
+  name?: string
+  message?: string
+  extensionId?: string
+  origin?: Origin
+
 }
 
 export interface ErrorSignalOpts extends BaseSignalOpts {
@@ -42,21 +47,13 @@ export interface ErrorSignalOpts extends BaseSignalOpts {
 export interface FlashSignalOpts extends BaseSignalOpts {
   action?: Actions.FLASH
   isMuted?: boolean
-  origin?: {
-    x: number
-    y: number
-  }
 }
 
 export interface DrawSignalOpts extends BaseSignalOpts {
   action?: Actions.DRAW
-  name?: string
-  message?: string
-  extensionId?: string
   data?: any
   link?: Link
   isMuted?: boolean
-  origin?: Origin
 }
 
 export type SignalOpts = ErrorSignalOpts | DrawSignalOpts | FlashSignalOpts
@@ -98,7 +95,7 @@ export interface Geometry {
   }
 }
 
-export interface RootConfig {
+export interface RootConfig extends Record<string, unknown> {
   extensionId?: string
   applet?: AppletConfig
   geometry?: Geometry

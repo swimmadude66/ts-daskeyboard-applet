@@ -3,7 +3,7 @@ import { Actions, ActionValue, Effects, IQPoint, Link, Origin, Signal, SignalOpt
 import { logger } from './logger'
 
 import { applicationConfig } from '../constants'
-const backendUrl = applicationConfig.desktopBackendUrl
+const backendUrl = applicationConfig.desktopBackendUrl ?? 'http://127.0.0.1:27301'
 const signalEndpoint = backendUrl + '/api/2.0/signals'
 
 const signalHeaders = {
@@ -14,7 +14,7 @@ const signalHeaders = {
  * Class representing a single point to be sent to the device
  * @param {string} color - The hexadecimal RGB color to activate, e.g. '#FFCCDD'
  * @param {string} effect - The effect to activate. Enumerated in Effects. 
- *   Default is empty.
+ *   Default is SET_COLOR.
  */
 export class QPoint implements IQPoint {
   constructor(public color: string, public effect = Effects.SET_COLOR) { }
@@ -96,7 +96,7 @@ export class QDesktopSignal {
       isMuted: signal.isMuted,
       message: signal.message,
       name: signal.name,
-      pid: "Q_MATRIX",
+      pid: 'Q_MATRIX',
     }
   
     logger.debug("Posting to local service:" + JSON.stringify(body))
@@ -104,7 +104,7 @@ export class QDesktopSignal {
     return request.post({
       uri: signalEndpoint,
       headers: signalHeaders,
-      body: body,
+      body,
       json: true,
       resolveWithFullResponse: true
     }).then((response) => {

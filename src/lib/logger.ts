@@ -10,17 +10,18 @@ interface LoggerOps {
 const DEFAULT_LOGGER_OPTS: LoggerOps = {
   winston: {
     level: 'info',
-    exitOnError: false
+    format: winston.format.json(),
+    handleExceptions: true,
   },
   level: 'info'
 }
 
-export class Logger {
+class AppletLogger {
 
   private _logger: winston.Logger
 
   constructor(opts: LoggerOps = DEFAULT_LOGGER_OPTS) {
-    this._logger = winston.createLogger(opts.winston)
+    this._logger = winston.createLogger(opts.winston ?? {})
     if (opts.filename) {
       this._logger.add(new winston.transports.File({
         filename: opts.filename,
@@ -55,4 +56,7 @@ export class Logger {
   }
 }
 
-export const logger = new Logger()
+const logOpts = process.env.loggingOptions ? JSON.parse(process.env.loggingOptions) : undefined
+export const logger = new AppletLogger(logOpts)
+
+export type Logger = AppletLogger

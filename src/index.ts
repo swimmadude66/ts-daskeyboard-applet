@@ -6,7 +6,7 @@ import { QDesktopSignal, QPoint } from './lib/q-signal'
 import { minimalConfig, readConfig, mergeDeep } from './lib/utility'
 
 import { applicationConfig } from './constants'
-import { Effects, Actions, AppletConfig, AuthorizationConfig, Geometry, RootConfig, Signal, OAuth2ProxyRequestOpts, OptionResponse, Authorization } from './types'
+import { Actions, AppletConfig, Geometry, RootConfig, Signal, OAuth2ProxyRequestOpts, OptionResponse, Authorization } from './types'
 
 const defaultOAuth2ProxyUrl = process.env.oAuth2ProxyBaseUrlDefault ||
   applicationConfig.oAuth2ProxyBaseUrlDefault
@@ -17,7 +17,7 @@ const maxSignalLogSize = 100
 /**
  * The base class for apps that run on the Q Desktop
  */
-export class QDesktopApp {
+class QDesktopApp {
   configured: boolean = false
 
   pollingBusy: boolean = false
@@ -46,6 +46,8 @@ export class QDesktopApp {
   private _pollInterval
 
   constructor() {
+    logger.info('CONSTRUCTING APPLET')
+
     process.on('SIGINT', async (message) => {
       logger.info("Got SIGINT, handling shutdown...")
       await this.shutdown()
@@ -86,7 +88,7 @@ export class QDesktopApp {
    */
   async processConfig(config?: RootConfig) {
     this.configured = false
-    this.rootConfig = Object.freeze(minimalConfig(config ? config : readConfig(logger)))
+    this.rootConfig = Object.freeze(minimalConfig(config ? config : readConfig(logger))) as RootConfig
     logger.debug("Constructing app with ROOT config: " + JSON.stringify(this.rootConfig))
 
     this.devMode = !!this.rootConfig.devMode
@@ -127,91 +129,83 @@ export class QDesktopApp {
     return true
   }
 
-
   async handleMessage(message: any) {
     logger.info("CHILD Received JSON message: " + JSON.stringify(message))
     const data = message.data || {}
     const type = data?.type
     logger.info("Message type: " + type)
     switch (type) {
-      case 'CONFIGURE':
-        {
-          logger.info("Reconfiguring: " + JSON.stringify(data.configuration))
-          const newConfig = Object.freeze(data.configuration)
-          this.processConfig(newConfig)
-          .then((_) => {
-            logger.info("Configuration was successful")
-            const result = JSON.stringify({
-              status: 'success',
-              data: {
-                type: 'CONFIGURATION_RESULT',
-                result: newConfig + ''
-              }
-            })
-            logger.info("Sending result: " + result)
-            process.send(result)
-          }).catch((error) => {
-            logger.error("Configuration had error: " + error)
-            const result = JSON.stringify({
-              status: 'error',
-              data: {
-                type: 'CONFIGURATION_RESULT',
-              },
-              message: error + ''
-            })
-            logger.info("Sending result: " + result)
-            process.send(result)
-          })
-          break
-        }
-      case 'FLASH':
-        {
-          logger.info("Got FLASH")
-          this.handleFlash()
-          break
-        }
-      case 'OPTIONS':
-        {
-          logger.info("CHILD Handling " + type)
-          const options = await this.options(data?.fieldName, data?.search)
-          logger.info("CHILD returned options.")
-          const response = {
+      case 'CONFIGURE': {
+        logger.info("Reconfiguring: " + JSON.stringify(data.configuration))
+        const newConfig = Object.freeze(data.configuration)
+        this.processConfig(newConfig)
+        .then((_) => {
+          logger.info("Configuration was successful")
+          const result = JSON.stringify({
             status: 'success',
             data: {
-              type: 'OPTIONS',
-              options: options
+              type: 'CONFIGURATION_RESULT',
+              result: newConfig + ''
             }
+          })
+          logger.info("Sending result: " + result)
+          process.send(result)
+        }).catch((error) => {
+          logger.error("Configuration had error: " + error)
+          const result = JSON.stringify({
+            status: 'error',
+            data: {
+              type: 'CONFIGURATION_RESULT',
+            },
+            message: error + ''
+          })
+          logger.info("Sending result: " + result)
+          process.send(result)
+        })
+        break
+      }
+      case 'FLASH': {
+        logger.info("Got FLASH")
+        this.handleFlash()
+        break
+      }
+      case 'OPTIONS': {
+        logger.info("CHILD Handling " + type)
+        const options = await this.options(data?.fieldName, data?.search)
+        logger.info("CHILD returned options.")
+        const response = {
+          status: 'success',
+          data: {
+            type: 'OPTIONS',
+            options: options
           }
-          process.send(JSON.stringify(response))
-          break
         }
-      case 'PAUSE':
-        {
-          logger.info("Got PAUSE")
-          this.paused = true
-          break
+        process.send(JSON.stringify(response))
+        break
+      }
+      case 'PAUSE': {
+        logger.info("Got PAUSE")
+        this.paused = true
+        break
+      }
+      case 'POLL': {
+        logger.info("Got POLL")
+        this.poll(true)
+        break
+      }
+      case 'START': {
+        logger.info("Got START")
+        if (this.paused) {
+          this.paused = false
+          this.poll()
+        } else {
+          this.start()
         }
-      case 'POLL':
-        {
-          logger.info("Got POLL")
-          this.poll(true)
-          break
-        }
-      case 'START':
-        {
-          logger.info("Got START")
-          if (this.paused) {
-            this.paused = false
-            this.poll()
-          } else {
-            this.start()
-          }
-          break
-        }
-      default:
-        {
-          logger.error("Don't know how to handle JSON message of type: '" + type + "'")
-        }
+        break
+      }
+      default: {
+        logger.error("Don't know how to handle JSON message of type: '" + type + "'")
+      }
     }
   }
 
@@ -286,6 +280,7 @@ export class QDesktopApp {
    */
   async poll(force: boolean = false) {
     if (!force && this.paused) {
+      logger.info('no op for pause')
       // no-op, we are paused
     } else if (!force && this.pollingBusy) {
       logger.info("Skipping run because we are still busy.")
@@ -315,12 +310,8 @@ export class QDesktopApp {
    */
   start() {
     this.paused = false
-    if (!this.configured) {
-      logger.info("Waiting for configuration to complete.")
-      this.awaitConfigured().then((_) => {
-        this.start()
-      })
-    } else {
+    this.awaitConfigured()
+    .then((_) => {
       if (this._pollInterval) {
         clearInterval(this._pollInterval)
         this._pollInterval = undefined
@@ -331,15 +322,15 @@ export class QDesktopApp {
       this._pollInterval = setInterval(() => {
         this.poll()
       }, this.pollingInterval)
-    }
+    })
   }
 
   private markConfigured() {
     if (this._configPromise) {
       this._configPromise.resolve(true)
       this._configPromise = undefined
-      this.configured = true
     }
+    this.configured = true
   }
 
   private async awaitConfigured() {

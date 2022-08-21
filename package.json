@@ -1,6 +1,6 @@
 {
   "name": "ts-daskeyboard-applet",
-  "version": "2.11.1",
+  "version": "2.11.2",
   "description": "A TS refactor of the library for handling signals and events in Das Keyboard Q Cloud",
   "main": "dist/index.js",
   "scripts": {
