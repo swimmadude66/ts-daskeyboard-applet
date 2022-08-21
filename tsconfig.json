@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
       "target": "es6",
-      "module": "commonjs",
+      "module": "ES2020",
       "moduleResolution": "node",
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
@@ -12,6 +12,9 @@
         "node_modules/@types/"
       ]
     },
+    "include": [
+      "src"
+    ],
     "exclude": [
       "tests/",
       "**/*.spec",

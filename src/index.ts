@@ -365,7 +365,7 @@ export class QDesktopApp {
    * This method is called once each polling interval. This is where most
    * of the work should be done.
    */
-  async run() {
+  async run(): Promise<Signal> | null {
     // Implement this method and do some work here.
     return null
   }
@@ -423,7 +423,7 @@ export class QDesktopApp {
     return this.geometry.origin.y
   }
 
-  async handleFlash() {
+  async handleFlash(): Promise<any> {
     const width = this.getWidth()
     const height = this.getHeight()
 
