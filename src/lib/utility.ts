@@ -93,8 +93,8 @@ export function minimalConfig(config: Record<string, unknown> = {}) {
 
 export function unFreeze<T = any>(obj: T): T {
   if (Object.isFrozen(obj)) {
-    const unfroze = Object.entries(obj).map(([key, value]) => ([key, unFreeze(obj)]))
-    return Object.fromEntries(unfroze)
+    const unfroze = Object.fromEntries(Object.entries(obj))
+    return unfroze as T
   } else {
     return obj
   }
