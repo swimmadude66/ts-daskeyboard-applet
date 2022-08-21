@@ -8,3 +8,5 @@ local-storage/
 .eslintrc
 .eslintrc.yml
 .gitignore
+
+example.ts/
